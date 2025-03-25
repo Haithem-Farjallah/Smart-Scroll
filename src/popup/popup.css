@@ -90,6 +90,7 @@ body {
 .header-left {
   display: flex;
   align-items: center;
+  padding-right: 5px;
 }
 
 .icon {
@@ -97,6 +98,7 @@ body {
   margin-left: 8px;
   width: 14px;
   height: 14px;
+  color: #0d1117;
 }
 
 /* a:hover {
@@ -114,11 +116,17 @@ p {
   cursor: default;
 }
 
-.subtext {
+.subtext,
+.no-upvotes {
   color: #8b949e;
   font-size: 12px;
 }
 
+.no-upvotes {
+  border-bottom: 1px solid #30363d;
+  padding: 12px;
+  margin-bottom: 5px;
+}
 .subheader {
   color: #8b949e;
 }
@@ -169,4 +177,69 @@ p {
   justify-content: space-between;
   padding-top: 6px;
   padding-bottom: 6px;
+}
+
+/*****************************/
+/* Updated Comment Info Styles - Minimal changes */
+.comment-info-container {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+}
+
+.comment-info-inner {
+  display: flex;
+  padding-top: 8px;
+}
+
+.comment-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%; /* Take full width */
+}
+
+.comment-info-data {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.comment-info-label {
+  color: #8b949e;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.comment-info-value {
+  color: #e6edf3;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.highest-voted-container {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #30363d;
+}
+
+.highest-voted {
+  color: #7ee787;
+  font-size: 12px;
+  font-weight: 500;
+  margin: 0;
+  text-align: center;
+}
+
+.welcome-message {
+  padding: 8px 0;
+  text-align: center;
+}
+
+/* Remove the comment-info-line styles since we don't want the left line */
+.comment-info-line {
+  display: none;
 }

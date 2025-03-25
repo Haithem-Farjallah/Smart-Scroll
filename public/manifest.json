@@ -1,8 +1,25 @@
 {
   "manifest_version": 3,
   "name": "ScrollSniper",
+  "description": "Quickly navigate to the most upvoted comments in GitHub issues and pull requests",
   "version": "1.0.0",
   "action": {
     "default_popup": "popup.html"
-  }
+  },
+  "icons": {
+    "16": "./scroll-down.png",
+    "32": "./scroll-down.png",
+    "48": "./scroll-down.png",
+    "128": "./scroll-down.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://github.com/*/*/issues/*",
+        "https://github.com/*/*/pull/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }

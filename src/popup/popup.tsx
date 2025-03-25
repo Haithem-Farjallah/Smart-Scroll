@@ -2,6 +2,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FaGithub } from "react-icons/fa";
 import "./popup.css";
+
 type CommentData = {
   comment: Element;
   upvotes: number;
@@ -12,31 +13,32 @@ const Popup = () => {
   const [currentURL, setCurrentURL] = useState<string>();
   const [currentComment, setCurrentComment] = useState<CommentData>();
   const [comments, setComments] = useState<CommentData[]>([]);
-  const [index, setIndex] = useState(-1);
+  const [index, setIndex] = useState(0); // Changed from -1 to 0
   const [hasNext, setHasNext] = useState(true);
   const [hasLast, setHasLast] = useState(false);
   const [date, setDate] = useState("");
-  console.log(currentURL, date, setCurrentComment, setHasLast);
+  console.log(currentURL);
   useEffect(() => {
-    let d = new Date(currentComment?.timestamp!);
-    setDate(
-      d.getUTCHours() +
-        ":" +
-        (d.getUTCMinutes() < 10 ? "0" : "") +
-        d.getUTCMinutes() +
-        ", " +
-        (d.getMonth() + 1) +
-        "/" +
-        d.getDate() +
-        "/" +
-        `${d.getFullYear()}`.slice(-2)
-    );
+    if (currentComment?.timestamp) {
+      let d = new Date(currentComment.timestamp);
+      setDate(
+        d.getUTCHours() +
+          ":" +
+          (d.getUTCMinutes() < 10 ? "0" : "") +
+          d.getUTCMinutes() +
+          ", " +
+          d.getDate() +
+          "/" +
+          (d.getMonth() + 1) +
+          "/" +
+          `${d.getFullYear()}`.slice(-2)
+      );
+    }
   }, [currentComment]);
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       setCurrentURL(tabs[0].url);
-      console.log(tabs[0]);
     });
   }, []);
 
@@ -48,10 +50,12 @@ const Popup = () => {
     else setHasNext(false);
   };
 
-  const lastComment = () => {
+  const prevComment = () => {
     if (index - 1 >= 0) {
       setIndex(index - 1);
     }
+    if (index - 1 >= 0) setHasLast(true);
+    else setHasLast(false);
   };
 
   useEffect(() => {
@@ -61,6 +65,14 @@ const Popup = () => {
   const loadComments = () => {
     sendMessage("loadComments", {}, (comments) => {
       setComments(comments);
+      if (comments.length > 0) {
+        setIndex(0);
+        sendMessage("scrollTo", { index: 0 }, (currentComment) => {
+          setCurrentComment(currentComment);
+        });
+        setHasNext(comments.length > 1);
+        setHasLast(false);
+      }
     });
   };
 
@@ -71,7 +83,6 @@ const Popup = () => {
   ) => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       const tab = tabs[0];
-      console.log(tab);
       if (tab.id) {
         if (responseCallback) {
           chrome.tabs.sendMessage(
@@ -85,6 +96,16 @@ const Popup = () => {
       }
     });
   };
+
+  useEffect(() => {
+    if (comments.length > 0) {
+      sendMessage("scrollTo", { index: index }, (currentComment) => {
+        setCurrentComment(currentComment);
+      });
+      setHasNext(index + 1 < comments.length);
+      setHasLast(index - 1 >= 0);
+    }
+  }, [index, comments.length]);
 
   return (
     <div className="popup">
@@ -105,11 +126,11 @@ const Popup = () => {
         {comments && comments.length > 0 ? (
           <div className="buttons">
             <button
-              className={`btn-dark btn  ${!hasLast && "disabled"}`}
-              onClick={lastComment}
+              className={`btn-dark btn ${!hasLast && "disabled"}`}
+              onClick={prevComment}
               disabled={!hasLast}
             >
-              Last
+              Prev
             </button>
             <div className="spacer" />
             <button
@@ -126,38 +147,50 @@ const Popup = () => {
           </div>
         )}
       </div>
-      {/* {comments && comments.length > 0 && (
+      {comments && comments.length > 0 && (
         <div className="comment-info-container">
+          {comments[0].upvotes === 0 && (
+            <div className="no-upvotes">
+              No upvotes found in this issue. Comments will be ordered by most
+              recent{" "}
+            </div>
+          )}
+
           <p className="subtext">Comment Information:</p>
           <div className="comment-info-inner">
             <div className="comment-info-line" />
             <div className="comment-info">
               {currentComment ? (
                 <>
-                  <CommentInfoItem
-                    text="Total Upvotes:"
-                    data={`${currentComment.upvotes}`}
-                  />
-                  <CommentInfoItem text="Commented on:" data={date} />
-                  {index === 0 ? (
-                    <AnimatedMount delay={0.2}>
-                      <div className="highest-voted-container">
-                        <p className="highest-voted">
-                          This is the most recent highest rated response
-                        </p>
-                      </div>
-                    </AnimatedMount>
-                  ) : (
-                    <></>
+                  <div className="comment-info-data">
+                    <span className="comment-info-label">Total Upvotes:</span>
+                    <span className="comment-info-value">
+                      {currentComment.upvotes}
+                    </span>
+                  </div>
+                  <div className="comment-info-data">
+                    <span className="comment-info-label">Commented on:</span>
+                    <span className="comment-info-value">{date}</span>
+                  </div>
+                  {index === 0 && comments[0].upvotes > 0 && (
+                    <div className="highest-voted-container">
+                      <p className="highest-voted">
+                        ⭐ This is the most recent highest rated response
+                      </p>
+                    </div>
                   )}
                 </>
               ) : (
-                <CommentInfoItem text="Click next to start sifting through the top rated comments! ❤️" />
+                <div className="comment-info-data welcome-message">
+                  <span className="comment-info-value">
+                    Loading comments...
+                  </span>
+                </div>
               )}
             </div>
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 };
