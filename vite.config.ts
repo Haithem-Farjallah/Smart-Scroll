@@ -7,7 +7,15 @@ export default defineConfig({
   root: ".",
   build: {
     rollupOptions: {
-      input: "./popup.html",
+      input: {
+        popup: "./popup.html",
+        content: "./src/popup/content.tsx",
+      },
+      output: {
+        entryFileNames: "[name].js",
+        assetFileNames: "assets/[name].[ext]",
+        chunkFileNames: "chunks/[name].[hash].js",
+      },
     },
   },
 });
