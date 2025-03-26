@@ -21,6 +21,6 @@ Enable **Developer mode** (toggle in top-right corner)
 
 Click **Load unpacked** and select:
 ```bash
-your-project-folder/public
+smart-scroll/public
 ```
 Extension is now ready to use!
