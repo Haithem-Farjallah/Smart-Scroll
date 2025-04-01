@@ -111,7 +111,7 @@ const Popup = () => {
     <div className="popup">
       <div className="header">
         <div className="header-left">
-          <p>Skip the Scroll</p>
+          <p>Smart Scroll</p>
           <a
             target="_blank"
             href={"https://github.com/Haithem-Farjallah/Smart-Scroll"}
